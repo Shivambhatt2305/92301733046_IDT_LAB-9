@@ -5,29 +5,30 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo 'Checking out source code...'
-                checkout scm
+                echo 'Checking out source code from GitHub...'
+            }
+        }
+
+        stage('Validate HTML') {
+            steps {
+                echo 'Checking HTML file...'
+                bat 'if not exist index.html exit /b 1'
+                bat 'findstr /I /C:"<html" index.html'
             }
         }
 
         stage('Build') {
             steps {
-                echo 'Building Maven project...'
-                bat 'mvn clean compile'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                echo 'Running tests...'
-                bat 'mvn test'
+                echo 'Building HTML application...'
+                bat 'if not exist index.html exit /b 1'
+                echo 'HTML application build completed successfully.'
             }
         }
 
         stage('Package') {
             steps {
-                echo 'Packaging application...'
-                bat 'mvn package'
+                echo 'Packaging HTML application...'
+                archiveArtifacts artifacts: 'index.html', fingerprint: true
             }
         }
     }
@@ -38,7 +39,7 @@ pipeline {
         }
 
         failure {
-            echo 'CI Pipeline failed.'
+            echo 'CI Pipeline failed!'
         }
     }
 }
